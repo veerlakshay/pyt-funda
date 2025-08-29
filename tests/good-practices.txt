@@ -1,0 +1,80 @@
+1 - Structure:
+
+- Mirror app modules when it helps (tests/unit/app/test_math_ops.py).
+- Keep production helpers out of tests/ (don’t ship test-only code).
+- Put common fixtures in tests/conftest.py; you can also add nested
+  conftest.py files per folder to scope fixtures/behavior to unit or integration only.
+
+
+2 - Markers: label tests for smart selection
+
+- @pytest.mark.unit — fast, pure-Python tests
+- @pytest.mark.integration — touches DB, network, filesystem beyond tmp
+- @pytest.mark.e2e — full-system flows
+- @pytest.mark.slow — heavy/long-running
+- @pytest.mark.smoke — tiny subset for quick sanity checks
+- @pytest.mark.db, @pytest.mark.network — capability-based labels
+
+3 - Register markers in config (so pytest doesn’t warn)
+
+- pyproject.toml
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests"]
+markers = [
+  "unit: fast, isolated tests",
+  "integration: medium tests with external deps (db/redis/http)",
+  "e2e: end-to-end tests",
+  "slow: long-running tests",
+  "smoke: small representative subset",
+  "db: requires database",
+  "network: does network calls",
+]
+
+
+4 - Always skip with reason
+
+- @pytest.mark.skip(reason="spec removed; replacing soon")
+- Conditional skip -> pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="POSIX only")
+
+
+
+5 - Expected failures (xfail) — acknowledge known gaps
+
+- @pytest.mark.xfail(reason="bug #123 not fixed yet")
+- If it fails → reported as XFAIL (expected fail, suite stays green).
+- If it passes → reported as XPASS (suspicious—maybe bug fixed or test wrong).
+
+- Make XPASS a failure (strict) -> @pytest.mark.xfail(strict=True, reason="pending spec change")
+- Conditional xfail -> @pytest.mark.xfail(sys.platform == "darwin", reason="macOS bug", strict=True)
+
+6 - Run focused subsets: -k and -m
+
+- run tests whose names match the expression
+- pytest -k "add and not divide" -vv
+- pytest -k "user and (create or update)"
+
+- Marker selection: -m
+- # only unit tests
+- pytest -m unit -q
+
+- # run unit OR smoke
+- pytest -m "unit or smoke"
+
+- # integration but not slow
+- pytest -m "integration and not slow" -vv
+
+
+7 - Handy report flags
+
+-x → stop on first failure
+
+--maxfail=2 → stop after N failures
+
+-q / -vv → quiet/very verbose
+
+-ra → summary of skips/xfails at end
+
+--durations=10 → show slowest 10 tests
+
+--lf / --ff → last-failed / failed-first

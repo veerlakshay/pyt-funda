@@ -155,3 +155,25 @@ def test_cwd(monkeypatch, tmp_path):
 
 # Keep patches local to a test when possible; if many tests need the same patch, wrap it in a fixture.
 
+import os, sys
+
+def write_low_level():
+    os.write(1, b"STDOUT via os.write\n")
+    os.write(2, b"STDERR via os.write\n")
+
+def test_low_level(capfd):
+    write_low_level()
+    out, err = capfd.readouterr()
+    assert "STDOUT via os.write" in out
+    assert "STDERR via os.write" in err
+
+def greet_cli(name: str) -> None:
+    print(f"Hello, {name}!")
+    print("Oops", file=sys.stderr)
+
+def test_greet_cli(capsys):
+    greet_cli("Lakshay")
+    out, err = capsys.readouterr()     # flush & read
+    assert "Hello, Lakshay!" in out
+    assert "Oops" in err
+
