@@ -1,0 +1,8 @@
+pyproject.toml
+app/__init__.py
+app/math_ops.py
+pytest_fundamentals.egg-info/PKG-INFO
+pytest_fundamentals.egg-info/SOURCES.txt
+pytest_fundamentals.egg-info/dependency_links.txt
+pytest_fundamentals.egg-info/top_level.txt
+tests/test_math_ops.py
